@@ -1,0 +1,6 @@
+script: |
+  echo "hello world"
+  export PROFİLE="teacher"
+  echo $PROFİLE
+pragraph: >
+  this line
