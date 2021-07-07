@@ -1,12 +1,12 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: |
+Description: >
   This Cloudformation Template was written for running Kittens Carousel Static Website on EC2. Kittens Carousel Static Website will be deployed on Amazon EC2 2 (XXXXXXXXXXXXXXXXXXX) EC2 instance with custom security Group which allows http connection on port 80 and SSH port 22 from anywhere. Kittens carousel Static Website is downloaded from my Public Github repository, then deployed on Apache Web server
 
 Resources:
   WebServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Enable HTTP for Apache Web Server and SSH for secure connection
+      GroupDescription: Enable HTTP for Apache Web Server and SSH for secure connection.
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
