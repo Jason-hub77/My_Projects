@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >
+  This Cloudformation Template was written for running Kittens Carousel Static Website on EC2. Kittens Carousel Static Website will be deployed on Amazon EC2 2 (XXXXXXXXXXXXXXXXXXX) EC2 instance with custom security Group which allows http connection on port 80 and SSH port 22 from anywhere. Kittens carousel Static Website is downloaded from my Public Github repository, then deployed on Apache Web server
+
+Resources:
+  WebServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable HTTP for Apache Web Server and SSH for secure connection.
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+  WebServerHost:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0ab4d1e9cf9a1215a
+      InstanceType: t2.micro
+      KeyName: 2078_ofc
+      SecurityGroupIds:
+        - !Ref WebServerSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub Web Server of ${AWS::StackName}
+      UserData: 
+        Fn::Base64:
+          !Sub |
+            ! /bin/bash
+            yum update -y
+            yum install httpd -y
+            TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` \
+&& PRIVATE_IP=`curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/local-ipv4`
+# get public ip address of ec2 instance using instance metadata
+TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` \
+&& PUBLIC_IP=`curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/public-ipv4` 
+# get date and time of server
+DATE_TIME=`date`
+# set all permissions
+chmod -R 777 /var/www/html
+# create a custom index.html file
+echo "<html>
+<head>
+    <title> Congratulations! You have created an instance from Launch Template</title>
+</head>
+<body>
+    <h1>This web server is launched from launch template by Jason_CAN</h1>
+    <p>This instance is created at <b>$DATE_TIME</b></p>
+    <p>Private IP address of this instance is <b>$PRIVATE_IP</b></p>
+    <p>Public IP address of this instance is <b>$PUBLIC_IP</b></p>
+</body>
+</html>" > /var/www/html/index.html
+            systemctl start httpd
+            systemctl enable httpd
+
+Outputs:
+  WebsiteURL:
+    Value: !Sub
+      - http://${PublicAddress}
+      - PublicAddress: !GetAtt WebServerHost.PublicDnsName
+    Description: Kittens Carousel Application URL 
