@@ -1,0 +1,2 @@
+https://aws.amazon.com/s3/pricing/?nc1=h_ls
+https://aws.amazon.com/tr/s3/faqs/
